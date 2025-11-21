@@ -19,6 +19,7 @@ const locationRoutes = require('./routes/locationRoutes');
 const emergencyRoutes = require('./routes/emergencyRoutes');
 const userRoutes = require('./routes/userRoutes');
 const voiceRoutes = require('./routes/voiceRoutes');
+const testRoutes = require('./routes/test');
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use('/api/location', locationRoutes);
 app.use('/api/emergency', emergencyRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/voice', voiceRoutes);
+app.use('/api/test', testRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {

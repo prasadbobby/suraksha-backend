@@ -1,22 +1,42 @@
-const ElevenLabs = require('@elevenlabs/elevenlabs-js');
+let ElevenLabs = null;
+try {
+  // Try different import methods for ElevenLabs
+  const elevenLabsModule = require('@elevenlabs/elevenlabs-js');
+  ElevenLabs = elevenLabsModule.ElevenLabs || elevenLabsModule.default || elevenLabsModule;
+
+  // Test if it's actually a constructor
+  if (typeof ElevenLabs !== 'function') {
+    console.warn('ElevenLabs is not a constructor, disabling voice features');
+    ElevenLabs = null;
+  }
+} catch (error) {
+  console.warn('ElevenLabs module import failed:', error.message);
+  ElevenLabs = null;
+}
 
 let elevenLabsClient = null;
 
 const initializeElevenLabs = () => {
-  if (process.env.ELEVEN_LABS_API_KEY && process.env.ELEVEN_LABS_API_KEY.startsWith('sk_')) {
-    try {
-      elevenLabsClient = new ElevenLabs({
-        apiKey: process.env.ELEVEN_LABS_API_KEY
-      });
-      console.log('✅ Eleven Labs voice service initialized');
-      return true;
-    } catch (error) {
-      console.log('⚠️  Eleven Labs initialization failed - Voice features disabled');
-      console.error(error);
-      return false;
-    }
-  } else {
+  // Early return if ElevenLabs is not available
+  if (!ElevenLabs) {
+    console.log('⚠️  ElevenLabs module not available - Voice features disabled');
+    return false;
+  }
+
+  if (!process.env.ELEVEN_LABS_API_KEY || !process.env.ELEVEN_LABS_API_KEY.startsWith('sk_')) {
     console.log('⚠️  Eleven Labs API key not provided - Voice features disabled');
+    return false;
+  }
+
+  try {
+    elevenLabsClient = new ElevenLabs({
+      apiKey: process.env.ELEVEN_LABS_API_KEY
+    });
+    console.log('✅ Eleven Labs voice service initialized');
+    return true;
+  } catch (error) {
+    console.log('⚠️  Eleven Labs initialization failed - Voice features disabled');
+    console.error('ElevenLabs error:', error.message);
     return false;
   }
 };
