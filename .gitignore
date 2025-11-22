@@ -98,3 +98,4 @@ dist/
 build/
 .vercel
 package-lock.json
+FIREBASE_SETUP.md

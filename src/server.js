@@ -7,7 +7,7 @@ const { requestLogger, corsMiddleware } = require('./middleware/logging');
 
 // Import services
 const { initializeTwilio, isTwilioAvailable } = require('./services/smsService');
-const { initializeElevenLabs, isElevenLabsAvailable } = require('./services/voiceService');
+const { initializeFirebase, isFirebaseAvailable } = require('./services/firebaseService');
 
 // Import database connection
 const connectDB = require('./config/database');
@@ -18,7 +18,7 @@ const contactRoutes = require('./routes/contactRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 const emergencyRoutes = require('./routes/emergencyRoutes');
 const userRoutes = require('./routes/userRoutes');
-const voiceRoutes = require('./routes/voiceRoutes');
+const firebaseRoutes = require('./routes/firebaseRoutes');
 const testRoutes = require('./routes/test');
 
 const app = express();
@@ -40,7 +40,7 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/emergency', emergencyRoutes);
 app.use('/api/user', userRoutes);
-app.use('/api/voice', voiceRoutes);
+app.use('/api/firebase', firebaseRoutes);
 app.use('/api/test', testRoutes);
 
 // Health Check
@@ -52,7 +52,7 @@ app.get('/api/health', (req, res) => {
     services: {
       mongodb: mongoose.connection.readyState === 1,
       twilio: isTwilioAvailable(),
-      elevenlabs: isElevenLabsAvailable()
+      firebase: isFirebaseAvailable()
     }
   });
 });
@@ -78,7 +78,7 @@ const startServer = async () => {
 
     // Initialize external services
     initializeTwilio();
-    initializeElevenLabs();
+    initializeFirebase();
 
     // Start server
     app.listen(PORT, () => {

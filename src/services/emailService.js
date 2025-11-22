@@ -31,60 +31,128 @@ const sendEmailWithRetry = async (emailData, maxRetries = 3) => {
 const sendEmergencyEmail = async (contact, userInfo, location) => {
   try {
     // Use Resend's more reliable onboarding domain or properly configured sender
-    const senderEmail = process.env.EMAIL_FROM || 'Suraksha Safety <onboarding@resend.dev>';
+    const senderEmail = process.env.EMAIL_FROM;
 
     const emailData = {
       from: senderEmail,
       to: [contact.email],
       subject: '🚨 EMERGENCY ALERT - Immediate Assistance Needed',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
-          <div style="background-color: #dc2626; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1 style="margin: 0; font-size: 24px;">🚨 EMERGENCY ALERT</h1>
-          </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>🚨 Emergency Alert - SURAKSHA</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
 
-          <div style="padding: 20px; border: 2px solid #dc2626; border-top: none; border-radius: 0 0 8px 8px;">
-            <p style="font-size: 18px; font-weight: bold; color: #dc2626; margin-bottom: 15px;">
-              <strong>${userInfo.name}</strong> has activated an emergency alert and needs immediate assistance.
-            </p>
+          <!-- Main Container -->
+          <div style="max-width: 600px; margin: 0 auto; background-color: white;">
 
-            <div style="background-color: #fef2f2; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
-              <h3 style="color: #dc2626; margin-top: 0;">👤 Contact Information:</h3>
-              <p style="margin: 5px 0;"><strong>Name:</strong> ${userInfo.name}</p>
-              <p style="margin: 5px 0;"><strong>Phone:</strong> ${userInfo.phone || 'Not provided'}</p>
-              <p style="margin: 5px 0;"><strong>Email:</strong> ${userInfo.email}</p>
+            <!-- Emergency Header -->
+            <div style="background-color: #dc2626; padding: 20px; text-align: center;">
+              <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: white;">
+                🚨 EMERGENCY ALERT
+              </h1>
+              <p style="margin: 10px 0 0 0; color: white; font-size: 16px;">
+                <strong>${userInfo.name}</strong> has activated an emergency alert and needs immediate assistance.
+              </p>
             </div>
 
-            ${location ? `
-            <div style="background-color: #f0f9ff; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #1e40af;">
-              <h3 style="color: #1e40af; margin-top: 0;">📍 Current Location:</h3>
-              <p style="margin: 5px 0;"><strong>Address:</strong> ${location.address || 'Address not available'}</p>
-              <p style="margin: 5px 0;"><strong>Coordinates:</strong> ${location.latitude}, ${location.longitude}</p>
-              <div style="margin-top: 10px;">
-                <a href="https://maps.google.com/maps?q=${location.latitude},${location.longitude}"
-                   style="background-color: #1e40af; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                   🗺️ View on Google Maps
-                </a>
+            <!-- Main Content -->
+            <div style="padding: 30px;">
+
+              <!-- Emergency Status -->
+              <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 8px 0; color: #dc2626; font-size: 18px;">🆘 Emergency Status: ACTIVE</h3>
+                <p style="margin: 0; color: #991b1b;">This person requires immediate assistance. Please take action now.</p>
+              </div>
+
+              <!-- Contact Information -->
+              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 16px 0; color: #1f2937; font-size: 18px;">👤 Contact Information</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: 600; color: #374151; width: 100px;">Name:</td>
+                    <td style="padding: 8px 0; color: #111827;">${userInfo.name}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: 600; color: #374151;">Phone:</td>
+                    <td style="padding: 8px 0; color: ${userInfo.phone ? '#059669' : '#dc2626'}; font-weight: ${userInfo.phone ? '600' : '400'};">${userInfo.phone || 'Not provided'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; font-weight: 600; color: #374151;">Email:</td>
+                    <td style="padding: 8px 0; color: #111827;">${userInfo.email}</td>
+                  </tr>
+                </table>
+              </div>
+
+              ${location ? `
+              <!-- Location Information -->
+              <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 16px 0; color: #1e40af; font-size: 18px;">📍 Current Location</h3>
+                <p style="margin: 0 0 12px 0; color: #1f2937;">
+                  <strong>Address:</strong> ${location.address || 'Resolving address...'}
+                </p>
+                <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 14px;">
+                  <strong>Coordinates:</strong> ${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}
+                </p>
+
+                <!-- Map Links -->
+                <div style="text-align: center;">
+                  <a href="https://maps.google.com/maps?q=${location.latitude},${location.longitude}"
+                     style="display: inline-block; background-color: #1f2937; color: white; padding: 12px 20px; text-decoration: none; border-radius: 6px; font-weight: 600; margin-right: 10px;">
+                    🗺️ View on Google Maps
+                  </a>
+                  <a href="https://maps.apple.com/?q=${location.latitude},${location.longitude}"
+                     style="display: inline-block; background-color: #6b7280; color: white; padding: 12px 20px; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                    🍎 Apple Maps
+                  </a>
+                </div>
+              </div>
+              ` : ''}
+
+              <!-- Emergency Actions -->
+              <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 16px 0; color: #d97706; font-size: 18px;">⚠️ URGENT ACTION REQUIRED</h3>
+                <ol style="margin: 0; padding-left: 20px; color: #92400e; line-height: 1.6;">
+                  <li style="margin-bottom: 8px; font-weight: 600;">Call ${userInfo.name} immediately${userInfo.phone ? ` at ${userInfo.phone}` : ''}</li>
+                  <li style="margin-bottom: 8px; font-weight: 600;">If no response, contact emergency services (911/100/112)</li>
+                  <li style="margin-bottom: 8px; font-weight: 600;">Share location information with authorities</li>
+                  <li style="font-weight: 600;">Try reaching through other mutual contacts</li>
+                </ol>
+              </div>
+
+              <!-- Emergency Contacts -->
+              <div style="background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 16px;">🚨 Emergency Numbers</h4>
+                <div style="text-align: center;">
+                  <a href="tel:100" style="display: inline-block; background-color: #dc2626; color: white; padding: 8px 16px; margin: 4px; border-radius: 4px; text-decoration: none; font-size: 14px; font-weight: 600;">📞 Police (100)</a>
+                  <a href="tel:102" style="display: inline-block; background-color: #059669; color: white; padding: 8px 16px; margin: 4px; border-radius: 4px; text-decoration: none; font-size: 14px; font-weight: 600;">🚑 Ambulance (102)</a>
+                  <a href="tel:1091" style="display: inline-block; background-color: #7c3aed; color: white; padding: 8px 16px; margin: 4px; border-radius: 4px; text-decoration: none; font-size: 14px; font-weight: 600;">👩 Women Helpline (1091)</a>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div style="background-color: #1f2937; padding: 20px; text-align: center; color: white;">
+              <h4 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">SURAKSHA Safety</h4>
+              <p style="margin: 0 0 12px 0; color: #d1d5db; font-size: 14px;">Emergency alert system protecting communities</p>
+              <div style="background-color: rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 6px;">
+                <p style="margin: 0; color: #e5e7eb; font-size: 12px;">
+                  📧 Alert sent on: <strong>${new Date().toLocaleString()}</strong>
+                </p>
+                <p style="margin: 4px 0 0 0; color: #e5e7eb; font-size: 12px;">
+                  🔔 This is an automated emergency notification
+                </p>
               </div>
             </div>
-            ` : ''}
 
-            <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
-              <h3 style="color: #856404; margin-top: 0;">⚠️ URGENT ACTION REQUIRED:</h3>
-              <ol style="color: #856404; font-weight: bold;">
-                <li>Call ${userInfo.name} immediately at ${userInfo.phone || 'their number'}</li>
-                <li>If no response, contact local emergency services (911/112)</li>
-                <li>Share this location information with authorities</li>
-                <li>Try to reach them through other contacts if possible</li>
-              </ol>
-            </div>
-
-            <div style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 12px; color: #6c757d; text-align: center; margin-top: 30px;">
-              <p style="margin: 0;">This emergency alert was automatically sent by Suraksha Safety App</p>
-              <p style="margin: 0;">Time: ${new Date().toLocaleString()}</p>
-            </div>
           </div>
-        </div>
+        </body>
+        </html>
       `
     };
 
